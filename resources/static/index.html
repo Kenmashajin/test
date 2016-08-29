@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+	
+	<script src="js/lib/sockjs-0.3.4.js"></script>
+    <script src="js/lib/stomp.js"></script>
+    <script src="js/lib/jquery.min.js"></script>
+    <!--  script src="js/lib/highcharts.js"></script-->
+    <script src="js/lib/underscore-min.js"></script>
+	
+    <script type="text/javascript">
+    	$(document).ready(function(){
+    		var channels=["Channel 1","Channel 2","Channel 3","Channel 4","Channel 5","Channel 6",]
+    		_.each(channels,function(item,indx){
+    			$("#channel").append("<option value='"+indx+"'>"+item+"</option>");
+    		});
+    	});
+    	
+        var stompClient = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
+            //document.getElementById('response').innerHTML = '';
+        }
+
+        function connect() {
+            var socket = new SockJS('/chart');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/chart/'+$("#channel").val(), function(chart){
+                    showChart(JSON.parse(chart.body).chart.options);
+                });
+            });
+        }
+
+        function disconnect() {
+            if (stompClient != null) {
+                stompClient.disconnect();
+            }
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function sendName() {
+            var chartName = document.getElementById('name').value;
+            stompClient.send("/app/chart/options/"+$("#channel").val(), {}, JSON.stringify({ 'chartName': chartName }));
+        }
+
+        function showChart(options) {
+            /*var response = document.getElementById('response');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.appendChild(document.createTextNode(options));
+            response.appendChild(p);*/
+            $('#container').highcharts(JSON.parse(options));
+        }
+    </script>
+</head>
+<body onload="disconnect()">
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div>
+    <div>
+    	Canal:
+        <select id="channel">
+   			<option value="None">-- Select --</option>
+   		</select>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+    </div>
+    
+    <div id="conversationDiv">
+        <label>¿Que grafica deseas generar?</label><input type="text" id="name" />
+        <button id="sendName" onclick="sendName();">Send</button>
+        <div id="container" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>
+        <h2>React</h2>
+        <div ng-app="app"  ng-controller="user_ctrl as sesion">
+    		<input type="text" ng-model="dato" />
+  			{{dato}}
+  			<input type="button" value="hola" ng-click="dato='hola'" />
+    		<div id="tipoCambio" class="row"></div>
+    </div>
+    </div>
+    	
+</div>
+
+ <script src="js/lib/angular.min.js"></script>
+ <script src="js/lib/react.min.js"></script>
+ <script src="js/lib/react-dom.min.js"></script>
+ <script src="js/lib/ngReact.min.js"></script>
+ <script src="js/lib/highstock.js"></script>
+ <script src="js/lib/funnel.js"></script>    
+ <script src="js/lib/jquery.number.min.js"></script>
+ <script src="js/angular/app.js"></script>
+</body>
+</html>

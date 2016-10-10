@@ -1,0 +1,23 @@
+div#info-map-head div.row{
+  text-align: center;
+}
+
+div#info-legend-map-head div.row{
+  text-align: center;
+}
+
+div.panel-body > div.col-md-3{
+  text-align: center;
+}
+
+div.panel-body > div.col-md-6{
+  text-align: center;
+}
+
+.info-map{
+   box-shadow: 10px 10px 5px grey;
+}
+
+.info-legend-map{
+  box-shadow: 10px 10px 5px grey;
+}

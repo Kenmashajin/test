@@ -1,0 +1,160 @@
+/**********************************************************************/
+Se agregan los mapeos a los recursos que voy a ocupar
+
+<Flow name="GET /usuarios">
+            <Condition>(proxy.pathsuffix MatchesPath "/usuarios") and (request.verb = "GET")</Condition>
+            <Description/>
+            <Request/>
+            <Response/>
+        </Flow>
+        
+<Flow name="GET /usuario">
+            <Condition>(proxy.pathsuffix MatchesPath "/usuarios/*") and (request.verb = "GET")</Condition>
+            <Description/>
+            <Request/>
+            <Response/>
+        </Flow>
+
+/**********************************************************************/
+Se mapea una RouteRule que indica que utilizará un TargetEndpoint llamado "mock"
+
+
+<RouteRule name="mock">
+        <Condition>(request.header.x-ismock = "true")</Condition>
+        <TargetEndpoint>mock</TargetEndpoint>
+</RouteRule>
+
+
+/**********************************************************************/
+Se crea el Target Endpoints "mock".
+
+Al crear el Target Endpoints mock es necesario remover el mapeo <HTTPTargetConnection> y cambiarlo por <HostedTarget/>
+
+/**********************************************************************/
+Finalmente se levantan todos los recursos necesarios para levantar el el ApiMocker
+NOTA: Todos deben ser indicados como File Type: HostedTarget
+
+**********************	
+*****package.json*****
+**********************
+{
+  "name": "TriremeUpgrade",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+   "start": "node app.js"
+  },
+  "author": "",
+  "license": "",
+  "description": "TriremeUpgrade",
+  "dependencies": {
+      "apimocker": "^0.4.13"
+  }
+}
+
+
+**********************	
+*******app.js*********
+**********************
+var ApiMocker = require('apimocker');
+
+console.log('apimocker.js application starting...');
+
+var options = {};
+
+var apiMocker = ApiMocker.createServer(options)
+    .setConfigFile('config-generated.json')
+    .start();
+    
+    
+**********************	
+*******app.yaml*******
+**********************
+runtime: node
+runtimeVersion: 8
+env:
+  - name: NODE_ENV
+    value: production
+  - name: LOG_LEVEL
+    value: 3
+    
+    
+    
+***********************************
+*******config-generated.json*******
+***********************************
+{
+    "mockDirectory": "./mock",
+    "quiet": false,
+    "port": "9000",
+    "latency": 50,
+    "9": false,
+    "webServices": {
+        "usuarios": {
+            "latency": 10,
+            "verbs": [
+                "get"
+            ],
+            "switch": [
+            ],
+            "responses": {
+                "get": {
+                    "httpStatus": 200,
+                    "mockFile": "ok_usuarios.json"
+                }
+            },
+            "switchResponses": {
+            }
+        }
+    }
+}
+
+
+
+********************************************
+*************mock/ok_usuarios.json**********
+********************************************
+{
+    "mensaje": "Operación Exitosa",
+    "folio": "22920190128140415938",
+    "resultado": {
+      "usuarios": [
+        {
+          "id": 1,
+          "nombre": "Albert Einstein",
+          "correoElectronico": "suCorreo@info.com",
+          "numeroTelefono": "5544332211",
+          "domicilio": {
+            "calle": "Los manantiales",
+            "numero": "SN",
+            "codigoPostal": "03422",
+            "ciudad": "Ciudad de México"
+          }
+        },
+        {
+          "id": 2,
+          "nombre": "Freddy Krueger",
+          "correoElectronico": "suCorreo@info.com",
+          "numeroTelefono": "5511223344",
+          "domicilio": {
+            "calle": "Corregidora",
+            "numero": "314 Bis",
+            "codigoPostal": "14250",
+            "ciudad": "Ciudad de México"
+          }
+        },
+        {
+          "id": 3,
+          "nombre": "Arnold Schwarzenegger",
+          "correoElectronico": "suCorreo@info.com",
+          "numeroTelefono": "5599887766",
+          "domicilio": {
+            "calle": "Insurgentes Sur",
+            "numero": "3695",
+            "codigoPostal": "77777",
+            "ciudad": "Ciudad de México"
+          }
+        }
+      ]
+    }
+  }
